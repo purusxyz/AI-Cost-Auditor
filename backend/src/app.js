@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from "dotenv"
 import connectDB from "./db/database.js"
-import router from "./routes/message.route.js";
+import messageRouter from "./routes/message.route.js";
+import auditorRouter from "./routes/auditor.route.js"
 
 const app = express();
 
@@ -23,7 +24,8 @@ app.use(cors(
 
 // API route
 
-app.use("/v1/api", router)
+app.use("/v1/api", messageRouter)
+app.use("/v1/api", auditorRouter)
 
 const PORT = 5000;
 

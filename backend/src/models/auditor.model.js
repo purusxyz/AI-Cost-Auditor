@@ -1,41 +1,114 @@
 import mongoose from "mongoose";
 
-const toolSchema = new mongoose.Schema({
-  toolName: String, // e.g. ChatGPT
-  plan: String,     // Plus / Team / API
-  monthlySpend: Number,
-  seats: Number,
-});
+ // User Input Schema
 
+const toolSchema = new mongoose.Schema({
+  toolName: {
+    type: String,
+    required: true,
+  },
+  plan: {
+    type: String, // current user plan
+  },
+  monthlySpend: {
+    type: Number,
+    required: true,
+  },
+  seats: {
+    type: Number,
+    default: 1,
+  }
+}, { _id: false });
+
+
+ //  Engine Output Schema
 const recommendationSchema = new mongoose.Schema({
-  toolName: String,
+  toolName: {
+    type: String,
+    required: true,
+  },
+
+  currentPlan: String,
   currentSpend: Number,
+
   recommendedPlan: String,
   recommendedSpend: Number,
+
   savings: Number,
-  reason: String,
-});
+
+  savingsPercent: Number,
+
+  reason: {
+    type: String,
+    required: true, // critical for assignment
+  },
+
+  tag: {
+    type: String,
+    enum: [
+      "OVERKILL_PLAN",
+      "UNDERUTILIZED",
+      "CHEAPER_ALTERNATIVE",
+      "OPTIMAL"
+    ],
+    default: "OPTIMAL",
+  },
+
+  confidence: {
+    type: Number, // 0 → 1
+    default: 0.8,
+  }
+
+}, { _id: false });
+
+//  Main Audit Schema
 
 const auditSchema = new mongoose.Schema({
-  tools: [toolSchema],
+  tools: {
+    type: [toolSchema],
+    required: true,
+  },
 
-  teamSize: Number,
+  teamSize: {
+    type: Number,
+    required: true,
+  },
+
   useCase: {
     type: String,
     enum: ["coding", "writing", "data", "research", "mixed"],
+    required: true,
   },
 
-  totalCurrentSpend: Number,
-  totalOptimizedSpend: Number,
-  totalSavings: Number,
+  totalCurrentSpend: {
+    type: Number,
+    required: true,
+  },
 
-  recommendations: [recommendationSchema],
+  totalOptimizedSpend: {
+    type: Number,
+    required: true,
+  },
 
-  aiSummary: String,
+  totalSavings: {
+    type: Number,
+    required: true,
+  },
+
+  recommendations: {
+    type: [recommendationSchema],
+    required: true,
+  },
+
+  aiSummary: {
+    type: String, // optional (LLM)
+  },
 
   publicId: {
     type: String,
+    required: true,
     unique: true,
+    index: true, // for fast lookup
   },
 
   isHighSavings: {
