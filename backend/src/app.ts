@@ -5,7 +5,7 @@ import connectDB from "./db/database.js"
 import messageRouter from "./routes/message.route.js";
 import auditorRouter from "./routes/auditor.route.js"
 
-const app = express();
+const app: Application = express();
 
 app.use(express.json());
 app.use(cors(
