@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { APiError } from "../utils/apiError.js";
+import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { nanoid } from "nanoid";
 import { Audit } from "../models/auditor.model.js";
@@ -24,15 +24,15 @@ export const createAudit = asyncHandler(
     /* ========= VALIDATION ========= */
 
     if (!tools || !Array.isArray(tools) || tools.length === 0) {
-      throw new APiError(400, "Tools are required");
+      throw new ApiError(400, "Tools are required");
     }
 
     if (!teamSize || teamSize <= 0) {
-      throw new APiError(400, "Valid teamSize is required");
+      throw new ApiError(400, "Valid teamSize is required");
     }
 
     if (!useCase) {
-      throw new APiError(400, "useCase is required");
+      throw new ApiError(400, "useCase is required");
     }
 
     /* ========= BUSINESS LOGIC ========= */
