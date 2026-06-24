@@ -6,9 +6,7 @@ import { nanoid } from "nanoid";
 import { Audit } from "../models/auditor.model.js";
 import { runAudit } from "../services/auditEngine.js";
 
-/* =========================
-   TYPES
-========================= */
+
 
 type CreateAuditBody = {
   tools: any[]; // you can replace with ITool[] later
@@ -16,9 +14,7 @@ type CreateAuditBody = {
   useCase: "coding" | "writing" | "data" | "research" | "mixed";
 };
 
-/* =========================
-   CONTROLLER
-========================= */
+
 
 export const createAudit = asyncHandler(
   async (req: Request<{}, {}, CreateAuditBody>, res: Response) => {
