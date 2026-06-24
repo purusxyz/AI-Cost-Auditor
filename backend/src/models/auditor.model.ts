@@ -1,123 +1,183 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Document, Model } from "mongoose";
 
- // User Input Schema
+/* =========================
+   INTERFACES
+========================= */
 
-const toolSchema = new mongoose.Schema({
-  toolName: {
-    type: String,
-    required: true,
+export interface ITool {
+  toolName: string;
+  plan?: string;
+  monthlySpend: number;
+  seats?: number;
+}
+
+export interface IRecommendation {
+  toolName: string;
+
+  currentPlan?: string;
+  currentSpend?: number;
+
+  recommendedPlan?: string;
+  recommendedSpend?: number;
+
+  savings?: number;
+  savingsPercent?: number;
+
+  reason: string;
+
+  tag?: "OVERKILL_PLAN" | "UNDERUTILIZED" | "CHEAPER_ALTERNATIVE" | "OPTIMAL";
+
+  confidence?: number;
+}
+
+export interface IAudit extends Document {
+  tools: ITool[];
+
+  teamSize: number;
+
+  useCase: "coding" | "writing" | "data" | "research" | "mixed";
+
+  totalCurrentSpend: number;
+  totalOptimizedSpend: number;
+  totalSavings: number;
+
+  recommendations: IRecommendation[];
+
+  aiSummary?: string;
+
+  publicId: string;
+
+  isHighSavings?: boolean;
+
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+/* =========================
+   SCHEMAS
+========================= */
+
+const toolSchema = new Schema<ITool>(
+  {
+    toolName: {
+      type: String,
+      required: true,
+    },
+    plan: String,
+    monthlySpend: {
+      type: Number,
+      required: true,
+    },
+    seats: {
+      type: Number,
+      default: 1,
+    },
   },
-  plan: {
-    type: String, // current user plan
+  { _id: false }
+);
+
+const recommendationSchema = new Schema<IRecommendation>(
+  {
+    toolName: {
+      type: String,
+      required: true,
+    },
+
+    currentPlan: String,
+    currentSpend: Number,
+
+    recommendedPlan: String,
+    recommendedSpend: Number,
+
+    savings: Number,
+    savingsPercent: Number,
+
+    reason: {
+      type: String,
+      required: true,
+    },
+
+    tag: {
+      type: String,
+      enum: [
+        "OVERKILL_PLAN",
+        "UNDERUTILIZED",
+        "CHEAPER_ALTERNATIVE",
+        "OPTIMAL",
+      ],
+      default: "OPTIMAL",
+    },
+
+    confidence: {
+      type: Number,
+      default: 0.8,
+    },
   },
-  monthlySpend: {
-    type: Number,
-    required: true,
+  { _id: false }
+);
+
+const auditSchema = new Schema<IAudit>(
+  {
+    tools: {
+      type: [toolSchema],
+      required: true,
+    },
+
+    teamSize: {
+      type: Number,
+      required: true,
+    },
+
+    useCase: {
+      type: String,
+      enum: ["coding", "writing", "data", "research", "mixed"],
+      required: true,
+    },
+
+    totalCurrentSpend: {
+      type: Number,
+      required: true,
+    },
+
+    totalOptimizedSpend: {
+      type: Number,
+      required: true,
+    },
+
+    totalSavings: {
+      type: Number,
+      required: true,
+    },
+
+    recommendations: {
+      type: [recommendationSchema],
+      required: true,
+    },
+
+    aiSummary: String,
+
+    publicId: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+    },
+
+    isHighSavings: {
+      type: Boolean,
+      default: false,
+    },
   },
-  seats: {
-    type: Number,
-    default: 1,
+  {
+    timestamps: true,
   }
-}, { _id: false });
+);
 
+/* =========================
+   MODEL
+========================= */
 
- //  Engine Output Schema
-const recommendationSchema = new mongoose.Schema({
-  toolName: {
-    type: String,
-    required: true,
-  },
-
-  currentPlan: String,
-  currentSpend: Number,
-
-  recommendedPlan: String,
-  recommendedSpend: Number,
-
-  savings: Number,
-
-  savingsPercent: Number,
-
-  reason: {
-    type: String,
-    required: true, // critical for assignment
-  },
-
-  tag: {
-    type: String,
-    enum: [
-      "OVERKILL_PLAN",
-      "UNDERUTILIZED",
-      "CHEAPER_ALTERNATIVE",
-      "OPTIMAL"
-    ],
-    default: "OPTIMAL",
-  },
-
-  confidence: {
-    type: Number, // 0 → 1
-    default: 0.8,
-  }
-
-}, { _id: false });
-
-//  Main Audit Schema
-
-const auditSchema = new mongoose.Schema({
-  tools: {
-    type: [toolSchema],
-    required: true,
-  },
-
-  teamSize: {
-    type: Number,
-    required: true,
-  },
-
-  useCase: {
-    type: String,
-    enum: ["coding", "writing", "data", "research", "mixed"],
-    required: true,
-  },
-
-  totalCurrentSpend: {
-    type: Number,
-    required: true,
-  },
-
-  totalOptimizedSpend: {
-    type: Number,
-    required: true,
-  },
-
-  totalSavings: {
-    type: Number,
-    required: true,
-  },
-
-  recommendations: {
-    type: [recommendationSchema],
-    required: true,
-  },
-
-  aiSummary: {
-    type: String, // optional (LLM)
-  },
-
-  publicId: {
-    type: String,
-    required: true,
-    unique: true,
-    index: true, // for fast lookup
-  },
-
-  isHighSavings: {
-    type: Boolean,
-    default: false,
-  }
-
-}, {
-  timestamps: true,
-});
-
-export const Audit = mongoose.model("Audit", auditSchema);
+export const Audit: Model<IAudit> = mongoose.model<IAudit>(
+  "Audit",
+  auditSchema
+);
