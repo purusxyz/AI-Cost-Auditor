@@ -1,47 +1,84 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Document, Model } from "mongoose";
 
-//  Plan Schema
-const planSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true, // Plus, Team, Pro, etc.
+/* =========================
+   INTERFACES
+========================= */
+
+export interface IPlan {
+  name: string;
+  pricePerUser: number;
+  type?: "monthly" | "yearly" | "api";
+}
+
+export interface IPricing extends Document {
+  toolName: string;
+
+  plans: IPlan[];
+
+  sourceUrl: string;
+
+  lastVerified: Date;
+
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+/* =========================
+   SCHEMAS
+========================= */
+
+const planSchema = new Schema<IPlan>(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    pricePerUser: {
+      type: Number,
+      required: true,
+    },
+    type: {
+      type: String,
+      enum: ["monthly", "yearly", "api"],
+      default: "monthly",
+    },
   },
-  pricePerUser: {
-    type: Number,
-    required: true,
+  { _id: false }
+);
+
+const pricingSchema = new Schema<IPricing>(
+  {
+    toolName: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+
+    plans: {
+      type: [planSchema],
+      required: true,
+    },
+
+    sourceUrl: {
+      type: String,
+      required: true,
+    },
+
+    lastVerified: {
+      type: Date,
+      required: true,
+    },
   },
-  type: {
-    type: String,
-    enum: ["monthly", "yearly", "api"],
-    default: "monthly",
+  {
+    timestamps: true,
   }
-}, { _id: false });
+);
 
-// Pricing Schema
-const pricingSchema = new mongoose.Schema({
-  toolName: {
-    type: String,
-    required: true,
-    unique: true, // one tool = one document
-  },
+/* =========================
+   MODEL
+========================= */
 
-  plans: {
-    type: [planSchema],
-    required: true,
-  },
-
-  sourceUrl: {
-    type: String,
-    required: true, // assignment requirement
-  },
-
-  lastVerified: {
-    type: Date,
-    required: true, // credibility
-  }
-
-}, {
-  timestamps: true,
-});
-
-export const PRICING = mongoose.model("Pricing", pricingSchema);
+export const Pricing: Model<IPricing> = mongoose.model<IPricing>(
+  "Pricing",
+  pricingSchema
+);
